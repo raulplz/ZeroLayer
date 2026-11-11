@@ -1,4 +1,4 @@
-"""Ajustes de Brave para FrostLayer. Uso: python3 brave.py <carpeta de Brave>
+"""Ajustes de Brave para ZerØLayer. Uso: python3 brave.py <carpeta de Brave>
 
 Solo cambia preferencias que Brave no protege con firma (protection.macs).
 El tema de color no se puede fijar desde aquí: Brave lo restaura al arrancar.

@@ -5,7 +5,7 @@
 MODULE_DESC="Brave limpio: pestañas verticales, nueva pestaña Frost y ahorro de memoria"
 MODULE_DEFAULT=0
 
-BRAVE_DIR="${FROSTLAYER_BRAVE_DIR:-$HOME/.config/BraveSoftware/Brave-Browser}"
+BRAVE_DIR="${ZEROLAYER_BRAVE_DIR:-$HOME/.config/BraveSoftware/Brave-Browser}"
 BRAVE_FILES=("$BRAVE_DIR/Default/Preferences" "$BRAVE_DIR/Local State")
 
 module_check() {
@@ -19,17 +19,17 @@ module_check() {
 
 module_apply() {
   local file
-  for file in "${BRAVE_FILES[@]}"; do fl_backup brave "$file"; done
-  fl_run python3 -I "$MODULE_DIR/brave.py" "$BRAVE_DIR"
+  for file in "${BRAVE_FILES[@]}"; do zl_backup brave "$file"; done
+  zl_run python3 -I "$MODULE_DIR/brave.py" "$BRAVE_DIR"
 }
 
 module_revert() {
   if pgrep -x brave >/dev/null; then
-    fl_err "Cierra Brave antes de deshacer sus cambios"
+    zl_err "Cierra Brave antes de deshacer sus cambios"
     return 1
   fi
   local file
   for file in "${BRAVE_FILES[@]}"; do
-    fl_restore brave "$file" || fl_warn "No hay copia de $file"
+    zl_restore brave "$file" || zl_warn "No hay copia de $file"
   done
 }

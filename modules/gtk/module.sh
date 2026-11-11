@@ -12,15 +12,15 @@ module_apply() {
   local css file
   css=$(<"$MODULE_DIR/frost.css")
   for file in "${GTK_FILES[@]}"; do
-    fl_backup gtk "$file"
-    fl_block_set "$file" gtk "/*" "$css"
+    zl_backup gtk "$file"
+    zl_block_set "$file" gtk "/*" "$css"
   done
-  fl_dim "  Las apps GTK abiertas cogen los colores al reiniciarlas."
+  zl_dim "  Las apps GTK abiertas cogen los colores al reiniciarlas."
 }
 
 module_revert() {
   local file
   for file in "${GTK_FILES[@]}"; do
-    fl_block_remove "$file" gtk "/*"
+    zl_block_remove "$file" gtk "/*"
   done
 }

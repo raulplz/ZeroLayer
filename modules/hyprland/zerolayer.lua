@@ -1,5 +1,5 @@
--- FrostLayer · Hyprland
--- Lo carga hypr/hyprland.lua. Para quitarlo: frostlayer uninstall hyprland
+-- ZerØLayer · Hyprland
+-- Lo carga hypr/hyprland.lua. Para quitarlo: zerolayer uninstall hyprland
 
 hl.config({
   general = { gaps_in = 5, gaps_out = 10, border_size = 2 },

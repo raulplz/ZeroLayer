@@ -1,0 +1,181 @@
+#!/usr/bin/env bash
+# ZerØLayer: capa de estética Frost para Omarchy.
+#   zerolayer install [módulo...]    aplica módulos (sin nombres: menú)
+#   zerolayer uninstall [módulo...]  deshace módulos (sin nombres: todos)
+#   zerolayer configure <módulo>      ajustes personales del módulo (p. ej. serpantinum)
+#   zerolayer status | list | update
+# Opciones: --yes (sin preguntas, módulos por defecto)  --dry-run (solo muestra)
+
+set -euo pipefail
+
+ZL_ROOT=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
+ZL_VERSION=$(cat "$ZL_ROOT/VERSION" 2>/dev/null || echo dev)
+# shellcheck source=../lib/common.sh
+source "$ZL_ROOT/lib/common.sh"
+
+ASSUME_YES=0
+
+banner() {
+  printf '\n%s  Ø  Z E R Ø L A Y E R%s  %sv%s%s\n\n' "$ZL_C_ICE" "$ZL_C_RESET" "$ZL_C_DIM" "$ZL_VERSION" "$ZL_C_RESET"
+}
+
+modules_all() {
+  local dir
+  for dir in "$ZL_ROOT"/modules/*/; do
+    [[ -f $dir/module.sh ]] && basename "$dir"
+  done
+}
+
+# Carga un módulo en una subshell para que sus funciones no se mezclen.
+with_module() {
+  local name=$1 action=$2
+  local MODULE_DIR="$ZL_ROOT/modules/$name"
+  [[ -f $MODULE_DIR/module.sh ]] || { zl_err "No existe el módulo «$name»"; return 1; }
+  (
+    MODULE_DESC="" MODULE_DEFAULT=0
+    # shellcheck source=/dev/null
+    source "$MODULE_DIR/module.sh"
+    case $action in
+      desc) printf '%s' "$MODULE_DESC" ;;
+      default) [[ $MODULE_DEFAULT == 1 ]] ;;
+      check) module_check ;;
+      apply) module_apply ;;
+      revert) module_revert ;;
+      configure)
+        if declare -F module_configure >/dev/null; then
+          module_configure
+        else
+          zl_warn "«$name» no tiene nada que configurar"
+        fi
+        ;;
+    esac
+  )
+}
+
+choose_modules() {
+  local names=() labels=() defaults=() name
+  while read -r name; do
+    names+=("$name")
+    labels+=("$name · $(with_module "$name" desc)")
+    with_module "$name" default && defaults+=("$name · $(with_module "$name" desc)")
+  done < <(modules_all)
+
+  if [[ $ASSUME_YES == 1 ]] || ! command -v gum >/dev/null || ! [[ -t 0 ]]; then
+    printf '%s\n' "${defaults[@]%% · *}"
+    return
+  fi
+  local selected
+  selected=$(IFS=,; gum choose --no-limit --header "¿Qué quieres aplicar? (espacio para marcar, Enter para seguir)" \
+    --selected "${defaults[*]}" "${labels[@]}") || return 1
+  printf '%s\n' "$selected" | sed 's/ · .*//'
+}
+
+cmd_install() {
+  banner
+  local modules=("$@")
+  if ((${#modules[@]} == 0)); then
+    mapfile -t modules < <(choose_modules)
+  fi
+  ((${#modules[@]})) || { zl_warn "No has elegido ningún módulo."; return 0; }
+
+  local name reason failed=0
+  for name in "${modules[@]}"; do
+    zl_info "$name · $(with_module "$name" desc)"
+    if ! reason=$(with_module "$name" check 2>&1); then
+      zl_warn "  Saltado: $reason"
+      failed=1
+      continue
+    fi
+    if with_module "$name" apply; then
+      zl_mark_installed "$name"
+      zl_ok "  Listo"
+    else
+      zl_err "  Ha fallado «$name»"
+      failed=1
+    fi
+  done
+  echo
+  zl_dim "Deshacer: zerolayer uninstall [módulo]   ·   Copias: $ZL_STATE/backups"
+  return $failed
+}
+
+cmd_uninstall() {
+  banner
+  local modules=("$@") name
+  if ((${#modules[@]} == 0)); then
+    while read -r name; do zl_is_installed "$name" && modules+=("$name"); done < <(modules_all)
+  fi
+  ((${#modules[@]})) || { zl_info "No hay módulos de ZerØLayer instalados."; return 0; }
+  for name in "${modules[@]}"; do
+    zl_info "Deshaciendo $name"
+    if with_module "$name" revert; then
+      zl_unmark_installed "$name"
+      zl_ok "  Deshecho"
+    else
+      zl_err "  No se pudo deshacer «$name» del todo"
+    fi
+  done
+}
+
+cmd_status() {
+  banner
+  local name mark
+  while read -r name; do
+    if zl_is_installed "$name"; then
+      mark="${ZL_C_OK}● instalado $(cat "$ZL_STATE/installed/$name")${ZL_C_RESET}"
+    else
+      mark="${ZL_C_DIM}○ no instalado${ZL_C_RESET}"
+    fi
+    printf '  %-12s %s\n' "$name" "$mark"
+  done < <(modules_all)
+}
+
+cmd_list() {
+  local name tag
+  while read -r name; do
+    tag=$(with_module "$name" default && echo "por defecto" || echo "opcional")
+    printf '%-12s %-12s %s\n' "$name" "$tag" "$(with_module "$name" desc)"
+  done < <(modules_all)
+}
+
+cmd_update() {
+  banner
+  if [[ -d $ZL_ROOT/.git ]]; then
+    zl_info "Actualizando ZerØLayer"
+    git -C "$ZL_ROOT" pull --ff-only
+  fi
+  local installed=() name
+  while read -r name; do zl_is_installed "$name" && installed+=("$name"); done < <(modules_all)
+  ((${#installed[@]})) && exec "$ZL_ROOT/bin/zerolayer" install "${installed[@]}"
+}
+
+main() {
+  local args=() arg
+  for arg in "$@"; do
+    case $arg in
+      --yes | -y) ASSUME_YES=1 ;;
+      --dry-run) ZL_DRY_RUN=1 ;;
+      -h | --help) sed -n '2,7p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; return 0 ;;
+      *) args+=("$arg") ;;
+    esac
+  done
+  export ZL_ASSUME_YES=$ASSUME_YES
+  set -- "${args[@]+"${args[@]}"}"
+  local cmd=${1:-install}
+  shift || true
+  case $cmd in
+    install) cmd_install "$@" ;;
+    uninstall | remove) cmd_uninstall "$@" ;;
+    configure)
+      [[ -n ${1:-} ]] || { zl_err "Uso: zerolayer configure <módulo>"; return 1; }
+      banner
+      with_module "$1" configure
+      ;;
+    status) cmd_status ;;
+    list) cmd_list ;;
+    update) cmd_update ;;
+    *) zl_err "Comando desconocido: $cmd"; return 1 ;;
+  esac
+}
+
+main "$@"
