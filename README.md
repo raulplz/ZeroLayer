@@ -1,6 +1,6 @@
 # Ø ZerØLayer
 
-Capa de estética **Frost** para [Omarchy](https://omarchy.org): azul hielo sobre negro, esquinas suaves, desenfoque, un arranque limpio y, si usas Serpantinum, un escritorio con widgets propios. No sustituye a Omarchy. Se instala encima, por módulos, y se puede deshacer entera.
+**ZeroLayer** (ZerØLayer) es una capa de estética **Frost** para [Omarchy](https://omarchy.org): azul hielo sobre negro, esquinas suaves, desenfoque, un arranque limpio y, si usas Serpantinum, un escritorio con widgets propios. No sustituye a Omarchy. Se instala encima, por módulos, y se puede deshacer entera.
 
 > Antes se llamaba **FrostLayer**. Si lo tenías instalado, el instalador de una línea lo migra solo (carpeta, estado y bloques marcados) y el comando `frostlayer` sigue funcionando como alias de `zerolayer`.
 
@@ -131,7 +131,7 @@ Añadir un módulo es crear `modules/<nombre>/module.sh` con `MODULE_DESC`, `MOD
 
 ## English
 
-ZerØLayer (formerly FrostLayer) is a modular **Frost** look for [Omarchy](https://omarchy.org): an Omarchy theme with custom wallpaper and folder icons, Hyprland polish, GTK colours, an optional ZERØ boot screen, an optional cleaner Brave and an optional Serpantinum desktop (Markdown notes, your GitHub contributions, pinned Claude Code or Codex chats and a LED-style audio spectrum; `zerolayer configure serpantinum` sets it up for you). Every change is backed up, wrapped in marked blocks and fully reversible.
+**ZeroLayer** (ZerØLayer, formerly FrostLayer) is a modular **Frost** look for [Omarchy](https://omarchy.org): an Omarchy theme with custom wallpaper and folder icons, Hyprland polish, GTK colours, an optional ZERØ boot screen, an optional cleaner Brave and an optional Serpantinum desktop (Markdown notes, your GitHub contributions, pinned Claude Code or Codex chats and a LED-style audio spectrum; `zerolayer configure serpantinum` sets it up for you). Every change is backed up, wrapped in marked blocks and fully reversible.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/raulplz/ZeroLayer/main/install.sh | bash
