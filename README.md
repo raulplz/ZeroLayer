@@ -64,7 +64,7 @@ zerolayer configure serpantinum
 
 Pregunta tu usuario de GitHub (propone el de `gh` si tienes sesión iniciada) y te enseña tus chats recientes de Claude Code y Codex para marcar los que quieres destacar. Solo lee metadatos de las sesiones (título, carpeta, fecha e id), nunca su contenido. En Claude Code salen primero las sesiones con nombre (`/rename`); en Codex, los hilos con nombre.
 
-Todo queda en `~/.config/zerolayer/serpantinum.json`, que el escritorio relee en caliente:
+Todo queda en `~/.config/zerolayer/serpantinum.json`, que el escritorio relee en caliente. Puedes cambiar a mano el nombre (`label`) y el icono (`icon`, un glifo Nerd Font) de cada chat: si vuelves a pasar el asistente, los chats que sigan marcados conservan lo que hayas puesto.
 
 ```json
 {

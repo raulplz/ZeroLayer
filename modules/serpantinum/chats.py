@@ -150,16 +150,27 @@ def cmd_save(config_path, cands_path, github, indices):
     except (OSError, ValueError):
         cfg = {}
     cands = json.loads(Path(cands_path).read_text(encoding="utf-8")) if cands_path != "-" else []
+    # Lo que el usuario personalizó a mano (nombre, icono, comando) se respeta
+    # en los chats que siguen marcados.
+    previous = {
+        (c.get("agent"), c.get("id")): c
+        for c in cfg.get("chats", []) if isinstance(c, dict)
+    }
     chats = []
     for raw in indices[:MAX_CHOSEN]:
         c = cands[int(raw)]
-        chats.append({
+        chat = {
             "agent": c["agent"],
             "id": c["id"],
             "label": re.sub(r"\s+", " ", c["label"])[:40],
             "cwd": short(c["cwd"]),
             "icon": ICONS.get(c["agent"], "󰚩"),
-        })
+        }
+        old = previous.get((c["agent"], c["id"]), {})
+        for key in ("label", "icon", "command"):
+            if old.get(key):
+                chat[key] = old[key]
+        chats.append(chat)
     cfg.setdefault("notesDir", "~/Notas")
     if github:
         cfg["githubUser"] = github
