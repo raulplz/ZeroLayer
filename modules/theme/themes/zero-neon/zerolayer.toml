@@ -1,0 +1,19 @@
+# Metadatos ZERØ: los lee el hook de ZerØLayer para escribir ~/.config/zerolayer/theme.json
+id = "zero-neon"
+nombre = "ZERØ Neon"
+glifo = "Ø"
+kanji = "電"
+idea = "Barrio de neón: magenta y cian, letreros verticales, lluvia y rejilla al horizonte."
+
+[colores]
+superficie = "#160e26"
+borde = "#2a1a40"
+tenue = "#8e83a8"
+acento2 = "#22e5ff"
+ok = "#3dffb0"
+aviso = "#ffd23f"
+peligro = "#ff4d7a"
+
+[fuentes]
+sans = "Inter Tight"
+mono = "JetBrainsMono Nerd Font"

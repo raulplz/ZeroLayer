@@ -3,6 +3,7 @@ import QtQuick.Effects
 import Quickshell
 import "../../../reusables"
 import "../../../"
+import "../zerolayer"
 
 // ZerØLayer (ZeroLayer) · espectro tipo osciloscopio: barras cuadradas en bloques LED desde una línea central.
 // Basado en las caras de visualizador de Serpantinum; módulo serpantinum de ZerØLayer (AGPL-3.0).
@@ -20,8 +21,9 @@ Item {
     property bool isVisVisible: visible
     property bool isSubscribed: false
 
-    readonly property color ice: ThemeBackend.blue
-    readonly property string mono: "JetBrainsMono Nerd Font"
+    ZlTheme { id: zl }   // paleta de ~/.config/zerolayer/theme.json (Frost si falta)
+    readonly property color ice: zl.acento
+    readonly property string mono: zl.mono
     readonly property int ledOn: 4
     readonly property int ledOff: 2
 

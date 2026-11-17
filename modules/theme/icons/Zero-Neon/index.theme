@@ -1,0 +1,12 @@
+[Icon Theme]
+Name=Zero-Neon
+Comment=Iconos de carpeta ZERØ Neon (ZerØLayer)
+Inherits=Yaru-magenta,breeze-dark,hicolor
+Directories=scalable/places
+
+[scalable/places]
+Size=48
+MinSize=16
+MaxSize=256
+Type=Scalable
+Context=Places

@@ -1,0 +1,19 @@
+# Metadatos ZERØ: los lee el hook de ZerØLayer para escribir ~/.config/zerolayer/theme.json
+id = "zero-corp"
+nombre = "ZERØ Corp"
+glifo = "Ø"
+kanji = "零"
+idea = "Cyberpunk corporativo: rojo y negro, kanji 零, katakana y franjas de seguridad."
+
+[colores]
+superficie = "#1a0a0d"
+borde = "#3a1218"
+tenue = "#9a8083"
+acento2 = "#ff4650"
+ok = "#7fbf8a"
+aviso = "#e8b04a"
+peligro = "#ff5c6c"
+
+[fuentes]
+sans = "Inter Tight"
+mono = "JetBrainsMono Nerd Font"

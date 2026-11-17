@@ -1,0 +1,19 @@
+# Metadatos ZERØ: los lee el hook de ZerØLayer para escribir ~/.config/zerolayer/theme.json
+id = "zero-amber"
+nombre = "ZERØ Amber"
+glifo = "Ø"
+kanji = "琥"
+idea = "Laboratorio de señal en ámbar: retícula de osciloscopio, ondas y brillo de tubo."
+
+[colores]
+superficie = "#1a1208"
+borde = "#3a2a10"
+tenue = "#a07a48"
+acento2 = "#ff7a1a"
+ok = "#b8d65a"
+aviso = "#ffcf4a"
+peligro = "#ff5a3c"
+
+[fuentes]
+sans = "Inter Tight"
+mono = "JetBrainsMono Nerd Font"

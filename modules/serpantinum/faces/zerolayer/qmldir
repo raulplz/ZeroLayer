@@ -1,0 +1,6 @@
+# ZeroLayer · piezas comunes de los widgets ZerØ (módulo serpantinum de ZerØLayer, AGPL-3.0)
+ZlTheme 1.0 ZlTheme.qml
+ZlConfig 1.0 ZlConfig.qml
+ZlFrame 1.0 ZlFrame.qml
+ZlButton 1.0 ZlButton.qml
+ZlRing 1.0 ZlRing.qml

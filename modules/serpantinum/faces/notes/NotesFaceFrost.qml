@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import "../../../reusables"
 import "../../../"
+import "../zerolayer"
 
 // ZerØLayer (ZeroLayer) · notas rápidas como archivos .md/.txt sueltos.
 // Carpeta: «notesDir» en ~/.config/zerolayer/serpantinum.json (por defecto ~/Notas).
@@ -25,8 +26,9 @@ Item {
     property real minAspect: 0.5
     property real maxAspect: 3.0
 
-    readonly property color ice: ThemeBackend.blue
-    readonly property string mono: "JetBrainsMono Nerd Font"
+    ZlTheme { id: zl }   // paleta de ~/.config/zerolayer/theme.json (Frost si falta)
+    readonly property color ice: zl.acento
+    readonly property string mono: zl.mono
     property string notesDir: Quickshell.env("HOME") + "/Notas"
 
     property var notes: []
@@ -293,7 +295,7 @@ done'
     // ---------- interfaz ----------
     Rectangle {
         anchors.fill: parent
-        color: Qt.alpha(ThemeBackend.crust, 0.62)
+        color: Qt.alpha(zl.fondo, 0.62)
         radius: 4
         border.width: 1
         border.color: Qt.alpha(root.ice, 0.35)
@@ -387,7 +389,7 @@ done'
                                 text: modelData.title
                                 font.family: root.mono
                                 font.pixelSize: 12
-                                color: ThemeBackend.text
+                                color: zl.texto
                                 elide: Text.ElideRight
                             }
                             Text {
@@ -402,7 +404,7 @@ done'
                             text: modelData.snippet !== "" ? modelData.snippet : modelData.file
                             font.family: root.mono
                             font.pixelSize: 10
-                            color: Qt.alpha(ThemeBackend.text, 0.5)
+                            color: Qt.alpha(zl.texto, 0.5)
                             elide: Text.ElideRight
                         }
                     }
@@ -459,7 +461,7 @@ done'
                 }
                 TinyButton {
                     glyph: root.confirmDelete ? "󰄬" : "󰩹"
-                    tint: root.confirmDelete ? ThemeBackend.red : root.ice
+                    tint: root.confirmDelete ? zl.peligro : root.ice
                     onClicked: root.trashNote()
                 }
             }
@@ -482,9 +484,9 @@ done'
                     persistentSelection: true
                     font.family: root.mono
                     font.pixelSize: 12
-                    color: ThemeBackend.text
+                    color: zl.texto
                     selectionColor: Qt.alpha(root.ice, 0.45)
-                    selectedTextColor: ThemeBackend.text
+                    selectedTextColor: zl.texto
                     placeholderText: "# título\nescribe aquí…"
                     placeholderTextColor: Qt.alpha(root.ice, 0.4)
                     leftPadding: 2

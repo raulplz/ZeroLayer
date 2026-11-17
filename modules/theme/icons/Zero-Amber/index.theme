@@ -1,0 +1,12 @@
+[Icon Theme]
+Name=Zero-Amber
+Comment=Iconos de carpeta ZERØ Amber (ZerØLayer)
+Inherits=Yaru-yellow,breeze-dark,hicolor
+Directories=scalable/places
+
+[scalable/places]
+Size=48
+MinSize=16
+MaxSize=256
+Type=Scalable
+Context=Places

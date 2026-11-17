@@ -1,0 +1,12 @@
+[Icon Theme]
+Name=Zero-Frost
+Comment=Iconos de carpeta ZERØ Frost (ZerØLayer)
+Inherits=Yaru-blue,breeze-dark,hicolor
+Directories=scalable/places
+
+[scalable/places]
+Size=48
+MinSize=16
+MaxSize=256
+Type=Scalable
+Context=Places

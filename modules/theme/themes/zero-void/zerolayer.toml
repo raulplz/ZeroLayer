@@ -1,0 +1,19 @@
+# Metadatos ZERØ: los lee el hook de ZerØLayer para escribir ~/.config/zerolayer/theme.json
+id = "zero-void"
+nombre = "ZERØ Void"
+glifo = "Ø"
+kanji = "虚"
+idea = "Vacío ultravioleta: nebulosa, órbitas finas y un Ø enorme flotando."
+
+[colores]
+superficie = "#13101e"
+borde = "#221a38"
+tenue = "#8a82a3"
+acento2 = "#5de4c7"
+ok = "#7fe0a8"
+aviso = "#f2d07a"
+peligro = "#ff6e8a"
+
+[fuentes]
+sans = "Inter Tight"
+mono = "JetBrainsMono Nerd Font"

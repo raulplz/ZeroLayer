@@ -33,7 +33,7 @@ git clone https://github.com/raulplz/ZeroLayer.git ~/.local/share/zerolayer
 
 | Módulo | Por defecto | Qué hace |
 |---|---|---|
-| `theme` | sí | Tema de Omarchy `frost`: paleta, fondo propio e iconos de carpeta Frost (sobre Yaru-blue). |
+| `theme` | sí | Seis temas ZERØ para Omarchy (`zero-frost`, `zero-corp`, `zero-neon`, `zero-phosphor`, `zero-amber`, `zero-void`) con paleta, fondo a la resolución de tu monitor e iconos de carpeta propios. Escribe `~/.config/zerolayer/theme.json` al cambiar de tema (ver «Temas ZERØ»). |
 | `hyprland` | sí | Esquinas de 14 px, márgenes, desenfoque, atenuado leve de ventanas inactivas y animación de escritorios en deslizamiento. |
 | `gtk` | sí | Colores Frost en aplicaciones GTK3/GTK4 (Nautilus, ajustes…). |
 | `boot` | no | Pantalla de arranque y desbloqueo con el logo ZERØ. Pide sudo y regenera la imagen de arranque. |
@@ -42,15 +42,111 @@ git clone https://github.com/raulplz/ZeroLayer.git ~/.local/share/zerolayer
 
 ![Arranque Frost](docs/arranque.png)
 
+## Temas ZERØ
+
+El módulo `theme` instala seis temas completos de Omarchy. Cada uno trae su paleta, un fondo a la resolución de tu monitor (1920×1200, 1920×1080 o 2560×1440), sus iconos de carpeta y su vista previa. Por eso también aparecen en el menú nativo de temas de Omarchy (Super + Alt + Espacio → Estilo → Tema).
+
+| Tema | Nombre | Acento | Idea |
+|---|---|---|---|
+| `zero-frost` | ZERØ Frost | `#4da3ff` | Azul hielo sobre negro, anillo HUD y circuitos. Es el de siempre. |
+| `zero-corp` | ZERØ Corp | `#e8182c` | Rojo y negro corporativo, kanji 零, katakana y franjas de seguridad. |
+| `zero-neon` | ZERØ Neon | `#ff2bd6` | Barrio de neón con lluvia y rejilla al horizonte; cian `#22e5ff` como segundo acento. |
+| `zero-phosphor` | ZERØ Phosphor | `#39ff6a` | Terminal de fósforo verde, líneas de barrido y brillo de tubo. |
+| `zero-amber` | ZERØ Amber | `#ffb000` | Laboratorio de señal en ámbar, retícula de osciloscopio. |
+| `zero-void` | ZERØ Void | `#a879ff` | Vacío ultravioleta, nebulosa y un Ø enorme. |
+
+![Escritorio con ZERØ Frost, Corp y Neon](docs/img/escritorio-frost.png)
+
+![ZERØ Corp](docs/img/escritorio-corp.png)
+
+![ZERØ Neon](docs/img/escritorio-neon.png)
+
+### Cómo elegir
+
+```bash
+zerolayer theme               # menú: gum en la terminal, o el de imágenes de Omarchy sin terminal
+zerolayer theme corp          # aplica uno por nombre (corp, zero-corp, neon…)
+zerolayer theme list          # temas instalados; el activo lleva un punto
+zerolayer theme status        # tema activo, si es ZERØ y la ruta y fecha de theme.json
+zerolayer theme update        # regenera los temas instalados y reaplica el activo
+zerolayer theme --menu        # fuerza el menú de imágenes (útil para un atajo de teclado)
+```
+
+Al instalar, si ya usas un tema ZERØ se queda; si no, arranca con `zero-frost`. Para empezar con otro: `ZEROLAYER_THEME=corp zerolayer install theme`.
+
+### Qué hace el hook
+
+El módulo instala el hook `~/.config/omarchy/hooks/theme-set.d/zerolayer-theme.hook`. Cada vez que cambia el tema de Omarchy, sea desde `zerolayer theme`, desde el menú nativo o con `omarchy-theme-set`, el hook escribe `~/.config/zerolayer/theme.json` con la paleta del tema activo, sea ZERØ o no. Si el módulo `gtk` está instalado, también recolorea GTK con esa paleta. Si tienes Serpantinum, el hook además escribe esa paleta en `theme.colors` de `~/.config/serpantinum/settings.json` (barra, paneles y notificaciones cambian en caliente; Serpantinum vigila ese archivo). La paleta que tenías se guarda antes del primer cambio y se devuelve al desinstalar. Para desactivarlo, añade `"themePalette": false` a `~/.config/zerolayer/serpantinum.json`.
+
+Lo leen ZeroStudy, ZeroAgents y los widgets de Serpantinum, que cambian de color en caliente. El esquema y cómo leerlo desde otra app están en [docs/theme-json.md](docs/theme-json.md).
+
+### Cómo deshacerlo
+
+`zerolayer uninstall theme` quita el hook, los temas y los iconos ZERØ, devuelve la paleta original de Serpantinum y borra `theme.json`. Si sigues en un tema ZERØ, antes vuelve al tema y al fondo que tenías al instalar. Solo quita lo que lleva la marca `.zerolayer`; tus otros temas no se tocan. Si no había un tema anterior guardado (por ejemplo, instalaste estando ya en un tema ZERØ), elige otro en el menú de Omarchy.
+
+Los fondos y las paletas se generan con `modules/theme/generar.py`. Para cambiar una paleta, edita `TEMAS` en ese archivo y regenera con `uv run --with pillow modules/theme/generar.py [id] [--solo-datos]`. Usar los temas no necesita nada de esto.
+
 ## Escritorio Serpantinum
 
 ![Escritorio ZerØ](docs/escritorio.png)
 
-El módulo `serpantinum` coloca una disposición Frost en el monitor activo y añade tres widgets:
+El módulo `serpantinum` coloca una disposición Frost en el monitor activo, según el perfil que elijas, y añade widgets propios. Los widgets ZERØ leen la paleta de `theme.json`, así que siguen al tema activo sin reiniciar nada.
+
+Los tres primeros son los de siempre:
 
 - **Notas** (`NOTAS://LOCAL`): cada nota es un archivo `.md` suelto. «+» crea una, se escribe dentro del widget y se guarda sola; Esc vuelve a la lista; el lápiz la abre en tu editor de Omarchy; la papelera (dos clics) la mueve a `.papelera` en vez de borrarla. También lista `.txt`.
 - **Chats IA** (`IA://CHATS`): hasta seis conversaciones destacadas de **Claude Code** o **Codex**. Un clic abre tu terminal en la carpeta de ese chat y lo reanuda (`claude --resume <id>` o `codex resume <id>`).
 - **Espectro hacker**: barras cuadradas en bloques LED que crecen desde una línea central.
+
+Además hay siete widgets nuevos para estudio, programación y juegos. Son solo de lectura salvo que se diga lo contrario:
+
+| Widget | Qué muestra |
+|---|---|
+| **ZeroStudy** | Pendientes del día, racha, anillo de dominio y próximo plazo (rojo a 7 días o menos, ámbar a 21 o menos). Botones Repasar y Abrir. Lee el archivo que escribe la app ZeroStudy. |
+| **Agenda** | Calendario del mes y los plazos de una tabla `.md` (`agendaFile`). |
+| **Pomodoro** | Bloques de foco y descanso, con aviso por `notify-send`. |
+| **Repos git** | Repos con cambios o commits sin subir. Clic abre `lazygit`. |
+| **Docker** | Contenedores (`docker ps -a`), solo lectura. Usa el contexto `dockerContext`. |
+| **ZeroAgents** | Abre el monitor de agentes (`zeroagents-gui` o `zeroagents`) y muestra las sesiones de Claude activas. |
+| **Juegos** | Últimos juegos de Steam o Heroic, uso de GPU y batería del mando. |
+
+Los widgets que ya había siguen igual: GitHub (compacto), Notas, Chats IA, Tiempo, Reloj, Música, Sistema (anillos de CPU, RAM, temperatura y disco) y Espectro.
+
+### Perfiles
+
+Un perfil es una disposición de widgets lista para usar. Elige el que más te sirva; después puedes quitar o añadir widgets a mano con el asistente.
+
+| Perfil | Widgets | Para |
+|---|---|---|
+| `clasico` | GitHub, notas, tiempo, sistema, chats IA, espectro | El escritorio de la versión 0.2.0. Es el predeterminado. |
+| `estudiante-dev` | El clásico más ZeroStudy | Estudiar y programar a la vez. |
+| `estudiante` | ZeroStudy, agenda, pomodoro, notas, chats IA, espectro | Sesiones de estudio. |
+| `dev` | GitHub, repos, Docker, sistema, ZeroAgents, chats IA, espectro | Trabajo con código y contenedores. |
+| `gamer` | Reloj, juegos, música, sistema, tiempo, espectro | Juegos y música. |
+| `basico` | Reloj, tiempo, agenda, música, notas, espectro | Lo justo. |
+
+```bash
+zerolayer configure widgets           # asistente (gum): perfil y ajuste widget a widget
+zerolayer configure widgets dev       # aplica un perfil sin preguntas
+```
+
+El asistente pide, solo si faltan, los ajustes que necesitan algunos widgets: carpetas de repos (`reposDirs`), contexto de Docker (`dockerContext`) y el archivo de la agenda (`agendaFile`). Los tipos nuevos también aparecen en el editor gráfico de widgets de Serpantinum.
+
+Todo queda en `~/.config/zerolayer/serpantinum.json`, junto a lo anterior. Sin el bloque `widgets`, se usa `clasico`:
+
+```json
+{
+  "widgets": { "profile": "estudiante", "list": ["zerostudy", "agenda", "pomodoro", "notas", "chats", "espectro"] },
+  "reposDirs": ["~/proyectos"],
+  "dockerContext": "desktop-linux",
+  "agendaFile": "~/Documentos/plazos.md",
+  "pomodoro": { "focus": 25, "break": 5, "long": 15, "every": 4 }
+}
+```
+
+Los tiempos de `pomodoro` van en minutos: `focus` es el bloque de foco, `break` el descanso corto, `long` el descanso largo y `every` cada cuántos bloques toca el largo.
+
+Captura con el perfil `estudiante-dev` en ZERØ Frost (los datos de ejemplo son de demostración).
 
 Además compacta el widget de **GitHub** para que quepa en 300 px y hace que los widgets solo se vean en un escritorio sin ventanas (Super + número de un escritorio vacío).
 
@@ -89,6 +185,8 @@ zerolayer uninstall [módulo…]   # sin nombres: todo lo instalado
 zerolayer status                # qué está aplicado
 zerolayer list                  # módulos disponibles
 zerolayer configure serpantinum # tu GitHub y tus chats de IA destacados
+zerolayer configure widgets [perfil] # perfil de widgets del escritorio (asistente si no das perfil)
+zerolayer theme [id|list|status|update|--menu]  # temas ZERØ: menú, aplicar, listar, estado o regenerar
 zerolayer update                # baja la última versión y reaplica lo instalado
 ```
 
@@ -131,7 +229,7 @@ Añadir un módulo es crear `modules/<nombre>/module.sh` con `MODULE_DESC`, `MOD
 
 ## English
 
-**ZeroLayer** (ZerØLayer, formerly FrostLayer) is a modular **Frost** look for [Omarchy](https://omarchy.org): an Omarchy theme with custom wallpaper and folder icons, Hyprland polish, GTK colours, an optional ZERØ boot screen, an optional cleaner Brave and an optional Serpantinum desktop (Markdown notes, your GitHub contributions, pinned Claude Code or Codex chats and a LED-style audio spectrum; `zerolayer configure serpantinum` sets it up for you). Every change is backed up, wrapped in marked blocks and fully reversible.
+**ZeroLayer** (ZerØLayer, formerly FrostLayer) is a modular look for [Omarchy](https://omarchy.org). Version 0.3.0 ships six ZERØ themes (Frost, Corp, Neon, Phosphor, Amber, Void) with wallpapers sized to your monitor and folder icons; a hook keeps `~/.config/zerolayer/theme.json`, GTK and the Serpantinum palette in sync with whichever Omarchy theme is active (`zerolayer theme`, `zerolayer theme status`). It also adds Hyprland polish, an optional ZERØ boot screen, an optional cleaner Brave and an optional Serpantinum desktop with 15 widgets and six profiles (`zerolayer configure widgets`). Every change is backed up, wrapped in marked blocks and fully reversible.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/raulplz/ZeroLayer/main/install.sh | bash

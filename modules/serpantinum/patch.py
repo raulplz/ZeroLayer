@@ -23,7 +23,43 @@ REG_CONTINUOUS = (
     '                "continuous": { file: "faces/visualizer/VisualizerFaceContinuous.qml", icon: "2", '
     'label: I18n.t("widgets.variants.continuous") }'
 )
+REG_FROST = (
+    '                "frost": { file: "faces/notes/NotesFaceFrost.qml", icon: "2", label: "Frost (.md)" } // ZeroLayer\n'
+)
 
+# Tipos de widget nuevos: (tipo, nombre, icono Nerd Font, ancho, alto, cara).
+NEW_TYPES = [
+    ("aichats", "Chats IA", "0xF06A9", 315, 190, "faces/aichats/AiChatsFace.qml"),
+    ("zerostudy", "ZeroStudy", "0xF0474", 315, 180, "faces/zerolayer/ZeroStudyFace.qml"),
+    ("zlagenda", "Agenda", "0xF00ED", 300, 270, "faces/zerolayer/AgendaFace.qml"),
+    ("zlpomodoro", "Pomodoro", "0xF13AB", 315, 170, "faces/zerolayer/PomodoroFace.qml"),
+    ("zlrepos", "Repos git", "0xF02A2", 300, 230, "faces/zerolayer/ReposFace.qml"),
+    ("zldocker", "Docker", "0xF0868", 300, 170, "faces/zerolayer/DockerFace.qml"),
+    ("zeroagents", "ZeroAgents", "0xF0849", 315, 80, "faces/zerolayer/ZeroAgentsFace.qml"),
+    ("zlgames", "Juegos", "0xF02B4", 300, 320, "faces/zerolayer/GamesFace.qml"),
+]
+
+
+def reg_type(tid, name, icon, w, h, face):
+    label = "Chats" if tid == "aichats" else "ZerØ"
+    return (
+        f'        "{tid}": {{\n'
+        f'            name: "{name}",\n'
+        f"            icon: String.fromCodePoint({icon}),\n"
+        f"            defaultWidth: {w},\n"
+        f"            defaultHeight: {h},\n"
+        '            defaultVariant: "default",\n'
+        "            variants: {\n"
+        f'                "default": {{ file: "{face}", icon: "1", label: "{label}" }}\n'
+        "            }\n"
+        "        }"
+    )
+
+
+REG_TYPES = ",\n".join(reg_type(*t) for t in NEW_TYPES) + "\n"
+REG_TYPES_020 = reg_type(*NEW_TYPES[0]) + "\n"  # módulo 0.2.0: solo «Chats IA»
+
+# Cada cambio: (archivo, original, nuevo[, [versiones anteriores de «nuevo»]]).
 EDITS = [
     # Widgets visibles solo en el escritorio (workspace) vacío.
     (
@@ -51,22 +87,12 @@ EDITS = [
     (
         "widgets/WidgetRegistry.qml",
         REG_NOTES_DEFAULT + "\n            }\n        }\n    })\n",
-        REG_NOTES_DEFAULT + ",\n"
-        '                "frost": { file: "faces/notes/NotesFaceFrost.qml", icon: "2", label: "Frost (.md)" } // ZeroLayer\n'
-        "            }\n        },\n"
-        "        // >>> ZeroLayer\n"
-        '        "aichats": {\n'
-        '            name: "Chats IA",\n'
-        "            icon: String.fromCodePoint(0xF06A9),\n"
-        "            defaultWidth: 315,\n"
-        "            defaultHeight: 190,\n"
-        '            defaultVariant: "default",\n'
-        "            variants: {\n"
-        '                "default": { file: "faces/aichats/AiChatsFace.qml", icon: "1", label: "Chats" }\n'
-        "            }\n"
-        "        }\n"
-        "        // <<< ZeroLayer\n"
-        "    })\n",
+        REG_NOTES_DEFAULT + ",\n" + REG_FROST + "            }\n        },\n"
+        "        // >>> ZeroLayer\n" + REG_TYPES + "        // <<< ZeroLayer\n    })\n",
+        [
+            REG_NOTES_DEFAULT + ",\n" + REG_FROST + "            }\n        },\n"
+            "        // >>> ZeroLayer\n" + REG_TYPES_020 + "        // <<< ZeroLayer\n    })\n"
+        ],
     ),
     # GitHub compacto: cabe en 300 px y enseña siempre las semanas recientes.
     (
@@ -100,7 +126,8 @@ EDITS = [
 def plan(root: Path, mode: str):
     """Devuelve {archivo: texto nuevo} y la lista de problemas."""
     texts, problems, notes = {}, [], []
-    for rel, old, new in EDITS:
+    for rel, old, new, *legacy in EDITS:
+        legacy = legacy[0] if legacy else []
         path = root / rel
         if rel not in texts:
             if not path.is_file():
@@ -112,15 +139,20 @@ def plan(root: Path, mode: str):
         if text is None:
             continue
         if mode in ("apply", "check"):
+            prev = next((x for x in legacy if x in text), None)
             if new in text:
                 notes.append(f"ya estaba: {rel}")
+            elif prev is not None:
+                texts[rel] = text.replace(prev, new)  # cambio de una versión anterior del módulo
             elif text.count(old) == 1:
                 texts[rel] = text.replace(old, new)
             else:
                 problems.append(f"no reconozco {rel} (¿otra versión de Serpantinum?)")
         else:  # revert
-            if new in text:
-                texts[rel] = text.replace(new, old)
+            for cur in [new] + legacy:
+                if cur in text:
+                    texts[rel] = text.replace(cur, old)
+                    break
     return texts, problems, notes
 
 

@@ -1,0 +1,19 @@
+# Metadatos ZERØ: los lee el hook de ZerØLayer para escribir ~/.config/zerolayer/theme.json
+id = "zero-phosphor"
+nombre = "ZERØ Phosphor"
+glifo = "Ø"
+kanji = "端"
+idea = "Terminal de fósforo verde: volcado de memoria, líneas de barrido y brillo CRT."
+
+[colores]
+superficie = "#0b140d"
+borde = "#143a1e"
+tenue = "#5f8f69"
+acento2 = "#7dffc0"
+ok = "#7dffa0"
+aviso = "#e6f55a"
+peligro = "#ff6b5b"
+
+[fuentes]
+sans = "Inter Tight"
+mono = "JetBrainsMono Nerd Font"

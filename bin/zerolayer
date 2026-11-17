@@ -2,8 +2,8 @@
 # ZerØLayer: capa de estética Frost para Omarchy.
 #   zerolayer install [módulo...]    aplica módulos (sin nombres: menú)
 #   zerolayer uninstall [módulo...]  deshace módulos (sin nombres: todos)
-#   zerolayer configure <módulo>      ajustes personales del módulo (p. ej. serpantinum)
-#   zerolayer status | list | update
+#   zerolayer configure <módulo>      ajustes del módulo (serpantinum; widgets [perfil]: escritorio)
+#   zerolayer theme [id|list|status|update|--menu]
 # Opciones: --yes (sin preguntas, módulos por defecto)  --dry-run (solo muestra)
 
 set -euo pipefail
@@ -29,6 +29,7 @@ modules_all() {
 # Carga un módulo en una subshell para que sus funciones no se mezclen.
 with_module() {
   local name=$1 action=$2
+  shift 2
   local MODULE_DIR="$ZL_ROOT/modules/$name"
   [[ -f $MODULE_DIR/module.sh ]] || { zl_err "No existe el módulo «$name»"; return 1; }
   (
@@ -48,6 +49,7 @@ with_module() {
           zl_warn "«$name» no tiene nada que configurar"
         fi
         ;;
+      configure-widgets) module_configure_widgets "$@" ;;
     esac
   )
 }
@@ -128,6 +130,9 @@ cmd_status() {
     fi
     printf '  %-12s %s\n' "$name" "$mark"
   done < <(modules_all)
+  if zl_is_installed theme; then
+    printf '\n  %-12s %s\n' "tema" "$(omarchy-theme-current 2>/dev/null) ${ZL_C_DIM}(zerolayer theme para cambiarlo)${ZL_C_RESET}"
+  fi
 }
 
 cmd_list() {
@@ -169,8 +174,13 @@ main() {
     configure)
       [[ -n ${1:-} ]] || { zl_err "Uso: zerolayer configure <módulo>"; return 1; }
       banner
-      with_module "$1" configure
+      if [[ $1 == widgets ]]; then  # selector de widgets del escritorio (módulo serpantinum)
+        with_module serpantinum configure-widgets "${@:2}"
+      else
+        with_module "$1" configure
+      fi
       ;;
+    theme) ZEROLAYER_DRY_RUN=$ZL_DRY_RUN exec "$ZL_ROOT/modules/theme/selector.sh" "$@" ;;
     status) cmd_status ;;
     list) cmd_list ;;
     update) cmd_update ;;

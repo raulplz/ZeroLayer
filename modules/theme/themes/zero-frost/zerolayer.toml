@@ -1,0 +1,19 @@
+# Metadatos ZERØ: los lee el hook de ZerØLayer para escribir ~/.config/zerolayer/theme.json
+id = "zero-frost"
+nombre = "ZERØ Frost"
+glifo = "Ø"
+kanji = "零"
+idea = "Azul hielo sobre negro: el Frost de siempre, con anillo HUD y circuitos."
+
+[colores]
+superficie = "#111923"
+borde = "#1c2a3a"
+tenue = "#8292a6"
+acento2 = "#75c4e8"
+ok = "#8fbea0"
+aviso = "#e6bf79"
+peligro = "#ef7180"
+
+[fuentes]
+sans = "Inter Tight"
+mono = "JetBrainsMono Nerd Font"

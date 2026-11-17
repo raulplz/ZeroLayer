@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 # Escritorio ZerØ para Serpantinum (https://github.com/ilyamiro/serpantinum).
-# Añade tres widgets (notas .md, chats de IA destacados, espectro hacker),
-# compacta el de GitHub, muestra los widgets solo en escritorios vacíos y
-# coloca una disposición Frost en el monitor activo.
+# Añade widgets propios (notas .md, chats de IA, espectro hacker, ZeroStudy,
+# agenda, pomodoro, repos git, Docker, ZeroAgents y juegos), compacta el de
+# GitHub, muestra los widgets solo en escritorios vacíos y coloca en el monitor
+# activo la disposición del perfil elegido (zerolayer configure widgets).
 # Serpantinum es AGPL-3.0: esta carpeta también (ver LICENSE.md).
 # Tras actualizar Serpantinum hay que volver a aplicarlo: zerolayer install serpantinum
 
-MODULE_DESC="Escritorio Serpantinum: notas .md, chats de IA, GitHub y espectro hacker (requiere Serpantinum)"
+MODULE_DESC="Escritorio Serpantinum: widgets ZerØ por perfiles (estudiante, dev, gamer, básico; requiere Serpantinum)"
 MODULE_DEFAULT=0
 
 SERP_DIR="${ZEROLAYER_SERPANTINUM_DIR:-$HOME/.local/share/serpantinum}"
@@ -14,6 +15,7 @@ SERP_QS="$SERP_DIR/src/quickshell"
 SERP_STATE="${ZEROLAYER_SERPANTINUM_STATE:-$HOME/.local/state/serpantinum}"
 ZL_SERP_CONFIG="$HOME/.config/zerolayer/serpantinum.json"
 FACES=(notes/NotesFaceFrost.qml aichats/AiChatsFace.qml visualizer/VisualizerFaceHacker.qml)
+FACES_DIR=zerolayer   # widgets ZerØ y piezas comunes (tema, marco, botón…), carpeta entera
 GITHUB_USER_FILE="${XDG_CACHE_HOME:-$HOME/.cache}/serpantinum/github/user.txt"
 CORE=(widgets/Widget.qml widgets/WidgetLoader.qml widgets/WidgetRegistry.qml widgets/faces/github/GithubFace.qml)
 
@@ -116,12 +118,22 @@ module_apply() {
     zl_run mkdir -p "$SERP_QS/widgets/faces/$(dirname "$face")"
     zl_run cp "$MODULE_DIR/faces/$face" "$SERP_QS/widgets/faces/$face"
   done
+  zl_run mkdir -p "$SERP_QS/widgets/faces/$FACES_DIR"
+  zl_run cp "$MODULE_DIR/faces/$FACES_DIR/"* "$SERP_QS/widgets/faces/$FACES_DIR/"
 
-  # Primera vez: asistente (GitHub y chats). Después: zerolayer configure serpantinum
+  # Primera vez: asistentes (GitHub y chats; perfil de widgets).
+  # Después: zerolayer configure serpantinum · zerolayer configure widgets
   if [[ ! -f $ZL_SERP_CONFIG ]]; then
     _ZL_IN_APPLY=1 module_configure || zl_warn "Configuración pendiente: zerolayer configure serpantinum"
+    _ZL_IN_APPLY=1 module_configure_widgets || zl_warn "Perfil pendiente: zerolayer configure widgets"
   fi
 
+  serp_layout || return 1
+  serp_reload
+}
+
+# Escribe la disposición del perfil elegido en el monitor con el foco.
+serp_layout() {
   local name width height layout
   read -r name width height < <(focused_monitor) || { zl_err "No pude leer el monitor activo"; return 1; }
   layout="$SERP_STATE/widgets/$name/layout.json"
@@ -132,9 +144,98 @@ module_apply() {
     zl_state_set serpantinum layout-created "$layout"
   fi
   zl_state_set serpantinum layout "$layout"
-  zl_run python3 -I "$MODULE_DIR/layout.py" "$width" "$height" "$layout"
+  zl_run python3 -I "$MODULE_DIR/layout.py" build "$width" "$height" "$layout" "$ZL_SERP_CONFIG"
   zl_dim "  Disposición para $name (${width}×${height}); los widgets se ven en un escritorio vacío"
+  SERP_MONITOR=$name
+}
 
+# Selector de widgets: perfil (dev, estudiante, gamer, básico…) y ajuste widget a widget.
+#   zerolayer configure widgets            asistente
+#   zerolayer configure widgets <perfil>   aplica un perfil sin preguntas
+module_configure_widgets() {
+  local L="$MODULE_DIR/layout.py" profile="${1:-}" current cur_ids
+  if [[ $ZL_DRY_RUN == 1 ]]; then
+    zl_dim "  (prueba) preguntaría perfil y widgets y recolocaría el escritorio"
+    return 0
+  fi
+  mkdir -p "$(dirname "$ZL_SERP_CONFIG")"
+  [[ -f $ZL_SERP_CONFIG ]] || cp "$MODULE_DIR/serpantinum.example.json" "$ZL_SERP_CONFIG"
+  { read -r current; read -r cur_ids; } < <(python3 -I "$L" current "$ZL_SERP_CONFIG")
+
+  local ids=()
+  if [[ -n $profile ]]; then
+    python3 -I "$L" ids "$profile" >/dev/null || { zl_err "Perfil desconocido: $profile (ver: $(python3 -I "$L" profiles | cut -d' ' -f1 | tr '\n' ' '))"; return 1; }
+    mapfile -t ids < <(python3 -I "$L" ids "$profile")
+  elif zl_interactive; then
+    local plabels=() line sel
+    mapfile -t plabels < <(python3 -I "$L" profiles)
+    for line in "${plabels[@]}"; do [[ ${line%% *} == "$current" ]] && sel=$line; done
+    profile=$(gum choose --height 10 --header "Perfil de escritorio (Enter para elegir; después podrás quitar o añadir widgets)" \
+      --selected "$sel" "${plabels[@]}") || return 1
+    profile=${profile%% *}
+
+    local clabels=() pre=() want picked
+    mapfile -t clabels < <(python3 -I "$L" catalog)
+    if [[ $profile == "$current" ]]; then want=" $cur_ids "; else want=" $(python3 -I "$L" ids "$profile" | tr '\n' ' ') "; fi
+    for line in "${clabels[@]}"; do [[ $want == *" ${line%% *} "* ]] && pre+=("$line"); done
+    picked=$(IFS=,; gum choose --no-limit --height 18 \
+      --header "Widgets en el escritorio (espacio para marcar, Enter para seguir)" \
+      --selected "${pre[*]}" "${clabels[@]}") || return 1
+    while read -r line; do [[ -n $line ]] && ids+=("${line%% *}"); done <<<"$picked"
+    ((${#ids[@]})) || { zl_warn "No has marcado ningún widget; se usa el perfil tal cual."; }
+  else
+    profile=$current
+    read -ra ids <<<"$cur_ids"
+  fi
+  python3 -I "$L" save "$ZL_SERP_CONFIG" "$profile" "${ids[@]}"
+  read -ra ids < <(python3 -I "$L" current "$ZL_SERP_CONFIG" | sed -n 2p)
+  widget_options "${ids[@]}"
+  zl_ok "  Perfil: $profile · widgets: ${ids[*]}"
+
+  [[ ${_ZL_IN_APPLY:-0} == 1 ]] && return 0
+  if ! zl_is_installed serpantinum; then
+    zl_dim "  Se aplicará al instalar: zerolayer install serpantinum"
+    return 0
+  fi
+  serp_layout || return 1
+  serp_widgets_reload
+}
+
+# Ajustes que necesitan algunos widgets; solo pregunta lo que falte.
+widget_options() {
+  local L="$MODULE_DIR/layout.py" have=" $* " v
+  if [[ $have == *" repos "* && -z $(python3 -I "$L" get "$ZL_SERP_CONFIG" reposDirs) ]]; then
+    v=""
+    for d in ~/Work/PROYECTOS ~/Proyectos ~/proyectos ~/Projects ~/projects ~/src ~/code ~/dev; do
+      [[ -d $d ]] && v+="${d/#$HOME/\~} "
+    done
+    if zl_interactive; then
+      v=$(gum input --header "Carpetas con tus repos git (separadas por espacios)" --value "${v% }") || v=""
+    fi
+    [[ -n ${v// /} ]] && python3 -I "$L" set "$ZL_SERP_CONFIG" reposDirs "$(python3 -I -c 'import json,sys; print(json.dumps(sys.argv[1].split()))' "$v")"
+  fi
+  if [[ $have == *" docker "* && -z $(python3 -I "$L" get "$ZL_SERP_CONFIG" dockerContext) ]] && command -v docker >/dev/null; then
+    # Docker Desktop usa su propio contexto; solo se lee la lista de contextos.
+    if docker context ls -q 2>/dev/null | grep -qx desktop-linux; then
+      python3 -I "$L" set "$ZL_SERP_CONFIG" dockerContext '"desktop-linux"'
+      zl_dim "  Docker: contexto desktop-linux"
+    fi
+  fi
+  if [[ $have == *" agenda "* && -z $(python3 -I "$L" get "$ZL_SERP_CONFIG" agendaFile) ]] && zl_interactive; then
+    v=$(gum input --header "Tabla de plazos .md para la agenda (vacío: solo calendario)" --placeholder "~/Notas/plazos.md") || v=""
+    [[ -n $v ]] && python3 -I "$L" set "$ZL_SERP_CONFIG" agendaFile "$(python3 -I -c 'import json,sys; print(json.dumps(sys.argv[1]))' "$v")"
+  fi
+  return 0
+}
+
+# Recarga solo los widgets del monitor (sin reiniciar el escritorio).
+serp_widgets_reload() {
+  [[ $ZL_DRY_RUN == 1 || ${ZEROLAYER_NO_RELOAD:-0} == 1 ]] && return 0
+  local target="widgets-${SERP_MONITOR//[^a-zA-Z0-9_-]/_}"
+  if command -v quickshell >/dev/null && pgrep -x quickshell >/dev/null &&
+    [[ $(quickshell -p "$SERP_QS/Shell.qml" ipc call "$target" reload 2>/dev/null) == ok ]]; then
+    return 0
+  fi
   serp_reload
 }
 
@@ -148,6 +249,11 @@ module_revert() {
     fi
   done
   [[ -d $SERP_QS/widgets/faces/aichats ]] && zl_run rmdir --ignore-fail-on-non-empty "$SERP_QS/widgets/faces/aichats"
+  local f
+  for f in "$SERP_QS/widgets/faces/$FACES_DIR"/*; do
+    grep -qs 'ZeroLayer' "$f" && zl_run rm -f "$f"
+  done
+  [[ -d $SERP_QS/widgets/faces/$FACES_DIR ]] && zl_run rmdir --ignore-fail-on-non-empty "$SERP_QS/widgets/faces/$FACES_DIR"
 
   layout=$(zl_state_get serpantinum layout)
   created=$(zl_state_get serpantinum layout-created)

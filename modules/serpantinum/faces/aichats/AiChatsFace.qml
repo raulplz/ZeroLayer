@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Io
 import "../../../reusables"
 import "../../../"
+import "../zerolayer"
 
 // ZerØLayer (ZeroLayer) · chats destacados de asistentes de IA (Claude Code, Codex u otros).
 // Se eligen con «zerolayer configure serpantinum»; se guardan en
@@ -22,8 +23,9 @@ Item {
     property real minAspect: 0.8
     property real maxAspect: 3.0
 
-    readonly property color ice: ThemeBackend.blue
-    readonly property string mono: "JetBrainsMono Nerd Font"
+    ZlTheme { id: zl }   // paleta de ~/.config/zerolayer/theme.json (Frost si falta)
+    readonly property color ice: zl.acento
+    readonly property string mono: zl.mono
 
     // Cómo reanudar cada agente: el id llega como $1 y la carpeta como $2.
     readonly property var resumeCommands: ({
@@ -72,7 +74,7 @@ Item {
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.alpha(ThemeBackend.crust, 0.62)
+        color: Qt.alpha(zl.fondo, 0.62)
         radius: 4
         border.width: 1
         border.color: Qt.alpha(root.ice, 0.35)
@@ -154,7 +156,7 @@ Item {
                             font.family: root.mono
                             font.pixelSize: 12
                             font.letterSpacing: 1
-                            color: hover.containsMouse ? ThemeBackend.text : Qt.alpha(ThemeBackend.text, 0.85)
+                            color: hover.containsMouse ? zl.texto : Qt.alpha(zl.texto, 0.85)
                             elide: Text.ElideRight
                         }
                         Rectangle {
