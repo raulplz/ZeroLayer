@@ -1,0 +1,21 @@
+[package]
+name = "zerolayer-theme"
+version = "0.3.1"
+edition = "2021"
+rust-version = "1.75"
+description = "Lector del contrato ~/.config/zerolayer/theme.json de ZeroLayer (paleta ZERØ para aplicaciones Rust)"
+license = "MIT"
+repository = "https://github.com/raulplz/ZeroLayer"
+readme = "README.md"
+
+[features]
+default = []
+# Vigilancia del archivo por sondeo (std, sin notify). No disponible en wasm32.
+watch = []
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]
+serde_json = "1"

@@ -229,7 +229,7 @@ Añadir un módulo es crear `modules/<nombre>/module.sh` con `MODULE_DESC`, `MOD
 
 ## English
 
-**ZeroLayer** (ZerØLayer, formerly FrostLayer) is a modular look for [Omarchy](https://omarchy.org). Version 0.3.0 ships six ZERØ themes (Frost, Corp, Neon, Phosphor, Amber, Void) with wallpapers sized to your monitor and folder icons; a hook keeps `~/.config/zerolayer/theme.json`, GTK and the Serpantinum palette in sync with whichever Omarchy theme is active (`zerolayer theme`, `zerolayer theme status`). It also adds Hyprland polish, an optional ZERØ boot screen, an optional cleaner Brave and an optional Serpantinum desktop with 15 widgets and six profiles (`zerolayer configure widgets`). Every change is backed up, wrapped in marked blocks and fully reversible.
+**ZeroLayer** (ZerØLayer, formerly FrostLayer) is a modular look for [Omarchy](https://omarchy.org). Version 0.3.1 ships six ZERØ themes (Frost, Corp, Neon, Phosphor, Amber, Void) with wallpapers sized to your monitor and folder icons; a hook keeps `~/.config/zerolayer/theme.json`, GTK and the Serpantinum palette in sync with whichever Omarchy theme is active (`zerolayer theme`, `zerolayer theme status`). It also adds Hyprland polish, an optional ZERØ boot screen, an optional cleaner Brave and an optional Serpantinum desktop with 15 widgets and six profiles (`zerolayer configure widgets`). Every change is backed up, wrapped in marked blocks and fully reversible.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/raulplz/ZeroLayer/main/install.sh | bash

@@ -153,6 +153,33 @@ def vigilar(al_cambiar, cada=2.0):
 
 Una aplicación de escritorio suele preferir un temporizador de su propio bucle o un observador de archivos en lugar de `time.sleep`; la idea es la misma.
 
+## Desde Rust
+
+El crate [`zerolayer-theme`](../crates/zerolayer-theme) implementa estas reglas (colores `#rrggbb` validados campo a campo, Frost de respaldo, fuentes saneadas, `XDG_CONFIG_HOME` vacío = no definido). Úsalo como dependencia git fijada a una etiqueta:
+
+```toml
+[dependencies]
+zerolayer-theme = { git = "https://github.com/raulplz/ZeroLayer", tag = "v0.3.1" }
+# con vigilancia: features = ["watch"]
+```
+
+```rust
+use zerolayer_theme::{CssMap, Key, Theme};
+
+let theme = Theme::load();
+// Nombres de variable propios de tu app; sin `.rename` salen --fondo, --acento, etc.
+let mapa = CssMap::default().rename(Key::Superficie, "--panel-2").fallbacks("system-ui, sans-serif", "monospace");
+for (nombre, valor) in theme.css_variables(&mapa) {
+    // aplícalo en :root
+}
+
+// Con la feature `watch`: sondeo por inodo, tamaño y fecha; llama también al empezar.
+let handle = zerolayer_theme::watch(std::time::Duration::from_secs(2), |theme| { /* repintar */ });
+// handle.stop() detiene el hilo. Para un bucle propio: `ThemeWatcher::new().poll()`.
+```
+
+`Theme` implementa `Serialize` y `Deserialize` (la segunda también valida), así que puede viajar tal cual entre el backend nativo y un frontend wasm. Sin la feature `watch` el crate compila a `wasm32-unknown-unknown` y no toca el sistema de archivos.
+
 ## Probar sin tocar tu configuración
 
 El script acepta rutas por variables de entorno, así que puedes generar el JSON en una carpeta temporal:

@@ -1,0 +1,5 @@
+{"version":1,"id":"zero-corp","nombre":"ZERØ Corp","modo":"dark","zerolayer":true,
+ "colores":{"fondo":"#0a0c10","superficie":"#14181f","borde":"#232a35","texto":"#E6E9EE","tenue":"#8b94a3","acento":"#e8182c","acento2":"#ff6b78","ok":"#7fb99a","aviso":"#e0b25a","peligro":"#ff5470"},
+ "fondo_pantalla":"/home/x/fondo.png","glifo":"Ø","kanji":"企",
+ "fuentes":{"sans":"Inter Tight","mono":"JetBrainsMono Nerd Font"},
+ "actualizado":"2026-11-17T22:06:49+01:00","clave_futura":{"x":1}}

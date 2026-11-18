@@ -1,0 +1,3 @@
+{"version":1,"id":"catppuccin","nombre":"Catppuccin","modo":"light","zerolayer":false,
+ "colores":{"fondo":"#fafafa","superficie":"#eeeeee","borde":"#cccccc","texto":"#222222","tenue":"#666666","acento":"#0066cc","acento2":"#00aaaa","ok":"#8fbea0","aviso":"#e6bf79","peligro":"#ef7180"},
+ "fondo_pantalla":"","glifo":"Ø","kanji":"零","fuentes":{"sans":"sans-serif","mono":"CaskaydiaMono Nerd Font"}}
