@@ -1,0 +1,9 @@
+[Unit]
+Description=ZerØLayer: arranque (Limine, Plymouth y SDDM) con el tema activo
+Documentation=https://github.com/raulplz/ZeroLayer
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/zerolayer/boot-sync
+TimeoutStartSec=900
+Nice=10

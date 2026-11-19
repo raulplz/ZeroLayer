@@ -20,7 +20,7 @@ Se abre un menú para elegir módulos (vienen marcados los de por defecto). Para
 curl -fsSL https://raw.githubusercontent.com/raulplz/ZeroLayer/main/install.sh | bash -s -- --yes
 ```
 
-El instalador clona el repositorio en `~/.local/share/zerolayer` y deja el comando `zerolayer` en `~/.local/bin`. No se ejecuta como root. Solo el módulo `boot` pide contraseña, a través de la herramienta oficial de Omarchy.
+El instalador clona el repositorio en `~/.local/share/zerolayer` y deja el comando `zerolayer` en `~/.local/bin`. No se ejecuta como root. Solo el módulo `boot` pide contraseña (una vez, para instalar su servicio), a través de la herramienta oficial de Omarchy.
 
 ¿Prefieres leer antes de ejecutar? Es buena idea:
 
@@ -36,7 +36,7 @@ git clone https://github.com/raulplz/ZeroLayer.git ~/.local/share/zerolayer
 | `theme` | sí | Seis temas ZERØ para Omarchy (`zero-frost`, `zero-corp`, `zero-neon`, `zero-phosphor`, `zero-amber`, `zero-void`) con paleta, fondo a la resolución de tu monitor e iconos de carpeta propios. Escribe `~/.config/zerolayer/theme.json` al cambiar de tema (ver «Temas ZERØ»). |
 | `hyprland` | sí | Esquinas de 14 px, márgenes, desenfoque, atenuado leve de ventanas inactivas y animación de escritorios en deslizamiento. |
 | `gtk` | sí | Colores Frost en aplicaciones GTK3/GTK4 (Nautilus, ajustes…). |
-| `boot` | no | Pantalla de arranque y desbloqueo con el logo ZERØ. Pide sudo y regenera la imagen de arranque. |
+| `boot` | no | Arranque que sigue al tema activo: menú de Limine (colores, tu fondo de escritorio y datos del sistema) y pantallas de contraseña de disco y de sesión con el logo ZERØ. Pide sudo una vez para instalar un servicio de systemd. |
 | `brave` | no | Brave más limpio: pestañas verticales plegadas, nueva pestaña Frost con solo el reloj, sin botones de Leo/Wallet/Rewards/News y ahorro de memoria. Brave debe estar cerrado. |
 | `serpantinum` | no | Escritorio para [Serpantinum](https://github.com/ilyamiro/serpantinum): notas `.md`, chats destacados de Claude Code o Codex, tu GitHub, espectro de audio «hacker» y widgets solo en escritorios vacíos. Requiere Serpantinum instalado. |
 
@@ -176,6 +176,12 @@ Todo queda en `~/.config/zerolayer/serpantinum.json`, que el escritorio relee en
 ¿Otra IA? Añade un chat con `"command"`: se ejecuta con bash en `cwd` y recibe el id como `$1`, por ejemplo `{ "agent": "gemini", "id": "…", "label": "…", "command": "exec gemini --resume \"$1\"" }`.
 
 Al actualizar Serpantinum se pierden los cambios en su código: vuelve a ejecutar `zerolayer install serpantinum`. Desinstalar devuelve el código de Serpantinum a su estado original y recupera tu disposición anterior; tus notas y la configuración se quedan.
+
+### Arranque con tema (módulo `boot`)
+
+`zerolayer install boot` instala el servicio `zerolayer-boot` (systemd, como root). Vigila `~/.config/zerolayer/theme.json` y, al cambiar de tema, reescribe la cabecera de `/boot/limine.conf` (paleta, marca, fondo), la pantalla de contraseña de disco (Plymouth) y la de sesión (SDDM); regenerar la imagen de arranque tarda ~1 min. Si `omarchy update` restaura la pantalla de Omarchy, se vuelve a aplicar sola.
+
+Seguridad: del `theme.json` solo se aceptan colores `#RRGGBB`, un id `[a-z0-9-]` y un nombre saneado; tu fondo se lee con tus permisos y solo si es un PNG o JPEG. Las entradas de arranque no se tocan y la `limine.conf` original queda en `/var/lib/zerolayer-boot/`. Estado: `journalctl -u zerolayer-boot`; deshacer: `zerolayer uninstall boot`.
 
 ## Uso
 

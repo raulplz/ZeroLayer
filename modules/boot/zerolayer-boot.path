@@ -1,0 +1,13 @@
+[Unit]
+Description=ZerØLayer: vigila el tema activo y los activos de arranque de Omarchy
+
+[Path]
+# Cambio de tema (lo escribe el hook de ZerØLayer).
+PathChanged=@HOME@/.config/zerolayer/theme.json
+# Si una actualización de Omarchy restaura su pantalla de arranque, se vuelve a aplicar.
+PathChanged=/usr/share/plymouth/themes/omarchy/logo.png
+PathChanged=/usr/share/sddm/themes/omarchy/Main.qml
+Unit=zerolayer-boot.service
+
+[Install]
+WantedBy=multi-user.target
