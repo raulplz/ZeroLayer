@@ -86,13 +86,34 @@ mg() { local out=${!#}; magick "${@:1:$#-1}" -strip +set date:create +set date:m
 # Logo: la forma del logo ZERØ en el color de acento del tema.
 mg "$SRC_LOGO" -alpha extract -background "#${C[acento]}" -alpha shape "$STAGE/logo.png"
 
-# Fondo del menú de Limine: rejilla, esquinas y datos del sistema, 1920x1200.
+# Resolución de Limine: la de la pantalla interna (eDP) conectada o, si no hay, la del primer
+# monitor conectado. Se puede fijar con RES=ANCHOxALTO en /etc/zerolayer/boot.conf.
+RES=${ZL_BOOT_RES:-$(sed -n 's/^RES=\([0-9]\{3,4\}x[0-9]\{3,4\}\)$/\1/p' "$CONF" | head -1)}
+if [[ -z $RES ]]; then
+  for c in $(ls -d "${ZL_DRM_DIR:-/sys/class/drm}"/card*-eDP-* "${ZL_DRM_DIR:-/sys/class/drm}"/card*-* 2>/dev/null | awk '!v[$0]++'); do
+    [[ $(cat "$c/status" 2>/dev/null) == connected ]] || continue
+    m=$(head -1 "$c/modes" 2>/dev/null)
+    if [[ $m =~ ^[0-9]{3,4}x[0-9]{3,4}$ ]]; then RES=$m; break; fi
+  done
+fi
+[[ $RES =~ ^[0-9]{3,4}x[0-9]{3,4}$ ]] || RES=1920x1200
+W=${RES%x*} H=${RES#*x}
+((W < 640 || H < 480 || W > 7680 || H > 4320)) && { W=1920; H=1200; }
+# Todo se dibuja a escala de la altura (1200 = tamaño base) para que 4K, ultrawide y
+# pantallas pequeñas se vean igual de bien; Limine recibe una imagen del tamaño exacto.
+k() { awk -v h="$H" -v v="$1" 'BEGIN{printf "%d", v*h/1200+.5}'; }
+FSCALE=2; ((H >= 2000)) && FSCALE=3; ((H >= 3000)) && FSCALE=4
+M=$(k 40) BR=$(k 100) SW=$(k 4); ((SW < 2)) && SW=2
+TXT=$(k 26)
+
+# Fondo del menú de Limine: rejilla, esquinas y datos del sistema.
 GRID=$(mezcla "${C[fondo]}" "${C[borde]}" .75)
-mg -size 80x80 "xc:#${C[fondo]}" -fill none -stroke "#$GRID" -strokewidth 1 \
-  -draw "line 0,0 79,0" -draw "line 0,0 0,79" "$STAGE/tile.png"
-mg -size 1920x1200 tile:"$STAGE/tile.png" "$STAGE/grid.png"
-mg "$STAGE/logo.png" -resize 1100x -channel A -evaluate multiply .10 +channel "$STAGE/logo-faint.png"
-BR=100 SW=4
+T=$(k 80)
+mg -size ${T}x${T} "xc:#${C[fondo]}" -fill none -stroke "#$GRID" -strokewidth 1 \
+  -draw "line 0,0 $((T-1)),0" -draw "line 0,0 0,$((T-1))" "$STAGE/tile.png"
+mg -size ${W}x${H} tile:"$STAGE/tile.png" "$STAGE/grid.png"
+LOGO_W=$(awk -v w="$W" -v h="$H" 'BEGIN{x=h*0.92; if (x>w*0.6) x=w*0.6; printf "%d", x}')
+mg "$STAGE/logo.png" -resize "${LOGO_W}x" -channel A -evaluate multiply .10 +channel "$STAGE/logo-faint.png"
 LEGIBLE=$(mezcla "${C[tenue]}" "${C[texto]}" .45)
 # Tu fondo de escritorio (fondo_pantalla del tema) como fondo del menú. Se lee con los
 # permisos del usuario, no con los de root, y solo se acepta si es un PNG o JPEG normal.
@@ -106,22 +127,23 @@ BASE="$STAGE/grid.png"
 AS_USER=(); ((EUID == 0)) && AS_USER=(runuser -u "$ZL_USER" --)
 if [[ -n $WALLPATH ]] && "${AS_USER[@]}" head -c 40000000 -- "$WALLPATH" >"$STAGE/user-bg.raw" 2>/dev/null \
    && [[ $(head -c 4 "$STAGE/user-bg.raw" | od -An -tx1 | tr -d ' \n') =~ ^(89504e47|ffd8ff) ]]; then
-  # Oscurecido con el color de fondo del tema para que el menú se lea bien.
+  # Recortado a «cubrir» la pantalla (sirve para cualquier proporción) y oscurecido con el
+  # color de fondo del tema para que el menú se lea bien.
   FMT=png; [[ $(head -c 2 "$STAGE/user-bg.raw" | od -An -tx1 | tr -d ' \n') == ffd8 ]] && FMT=jpeg
-  mg "$FMT:$STAGE/user-bg.raw" -resize 1920x1200^ -gravity center -extent 1920x1200 \
-    \( -size 1920x1200 "xc:#${C[fondo]}" -alpha set -channel A -evaluate set 45% +channel \) -composite "$STAGE/user-bg.png" \
+  mg "$FMT:$STAGE/user-bg.raw" -resize "${W}x${H}^" -gravity center -extent "${W}x${H}" \
+    \( -size ${W}x${H} "xc:#${C[fondo]}" -alpha set -channel A -evaluate set 45% +channel \) -composite "$STAGE/user-bg.png" \
     && BASE="$STAGE/user-bg.png" && : >"$STAGE/usa-fondo"
 fi
 if [[ -f $STAGE/usa-fondo ]]; then FAINT=(); else FAINT=("$STAGE/logo-faint.png" -gravity center -composite); fi
 mg "$BASE" "${FAINT[@]}" \
   -fill none -stroke "#${C[acento]}" -strokewidth $SW \
-  -draw "polyline 40,$((40+BR)) 40,40 $((40+BR)),40" \
-  -draw "polyline $((1920-40-BR)),40 $((1920-40)),40 $((1920-40)),$((40+BR))" \
-  -draw "polyline 40,$((1200-40-BR)) 40,$((1200-40)) $((40+BR)),$((1200-40))" \
-  -draw "polyline $((1920-40-BR)),$((1200-40)) $((1920-40)),$((1200-40)) $((1920-40)),$((1200-40-BR))" \
-  -stroke none -font "$FONT" -pointsize 26 \
-  -fill "#${C[acento]}" -gravity southwest -annotate +80+78 "ZEROLAYER // ${C[nombre]}" \
-  -fill "#$LEGIBLE" -gravity southeast -annotate +80+78 "OMARCHY ${OVER:-?}  ·  LINUX ${KVER:-?}  ·  ${HOST:-PC}" \
+  -draw "polyline $M,$((M+BR)) $M,$M $((M+BR)),$M" \
+  -draw "polyline $((W-M-BR)),$M $((W-M)),$M $((W-M)),$((M+BR))" \
+  -draw "polyline $M,$((H-M-BR)) $M,$((H-M)) $((M+BR)),$((H-M))" \
+  -draw "polyline $((W-M-BR)),$((H-M)) $((W-M)),$((H-M)) $((W-M)),$((H-M-BR))" \
+  -stroke none -font "$FONT" -pointsize "$TXT" \
+  -fill "#${C[acento]}" -gravity southwest -annotate +$((M+BR*40/100))+$((M+BR*38/100)) "ZEROLAYER // ${C[nombre]}" \
+  -fill "#$LEGIBLE" -gravity southeast -annotate +$((M+BR*40/100))+$((M+BR*38/100)) "OMARCHY ${OVER:-?}  ·  LINUX ${KVER:-?}  ·  ${HOST:-PC}" \
   "$STAGE/wallpaper.png"
 
 # Plymouth y SDDM a partir de los activos originales de Omarchy.
@@ -176,8 +198,9 @@ vals = {
   "wallpaper_style": "stretched",
   "term_background": "60" + bg,
   "backdrop": bg,
-  "term_margin": "56",
-  "term_margin_gradient": "12",
+  "term_font_scale": "${FSCALE}x${FSCALE}",
+  "term_margin": "$(k 56)",
+  "term_margin_gradient": "$(k 12)",
   "term_foreground": tx,
   "term_foreground_bright": "$(mezcla "${C[texto]}" ffffff .5)",
   "term_background_bright": "${C[superficie]}",

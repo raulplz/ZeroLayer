@@ -181,6 +181,8 @@ Al actualizar Serpantinum se pierden los cambios en su código: vuelve a ejecuta
 
 `zerolayer install boot` instala el servicio `zerolayer-boot` (systemd, como root). Vigila `~/.config/zerolayer/theme.json` y, al cambiar de tema, reescribe la cabecera de `/boot/limine.conf` (paleta, marca, fondo), la pantalla de contraseña de disco (Plymouth) y la de sesión (SDDM); regenerar la imagen de arranque tarda ~1 min. Si `omarchy update` restaura la pantalla de Omarchy, se vuelve a aplicar sola.
 
+Resolución: el fondo del menú se genera al tamaño exacto de tu pantalla (la interna, o el primer monitor conectado), con el fondo recortado para cubrirla y los adornos escalados, así que sirve en 1080p, 4K, ultrawide 21:9 o 32:9. Para fijarla a mano, añade `RES=3440x1440` a `/etc/zerolayer/boot.conf` y ejecuta `sudo systemctl start zerolayer-boot`. Si cambias de monitor, se recalcula en el siguiente cambio de tema o con ese mismo comando.
+
 Seguridad: del `theme.json` solo se aceptan colores `#RRGGBB`, un id `[a-z0-9-]` y un nombre saneado; tu fondo se lee con tus permisos y solo si es un PNG o JPEG. Las entradas de arranque no se tocan y la `limine.conf` original queda en `/var/lib/zerolayer-boot/`. Estado: `journalctl -u zerolayer-boot`; deshacer: `zerolayer uninstall boot`.
 
 ## Uso
