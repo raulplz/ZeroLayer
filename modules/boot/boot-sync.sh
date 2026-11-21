@@ -143,7 +143,7 @@ mg "$BASE" "${FAINT[@]}" \
   -draw "polyline $((W-M-BR)),$((H-M)) $((W-M)),$((H-M)) $((W-M)),$((H-M-BR))" \
   -stroke none -font "$FONT" -pointsize "$TXT" \
   -fill "#${C[acento]}" -gravity southwest -annotate +$((M+BR*40/100))+$((M+BR*38/100)) "ZEROLAYER // ${C[nombre]}" \
-  -fill "#$LEGIBLE" -gravity southeast -annotate +$((M+BR*40/100))+$((M+BR*38/100)) "OMARCHY ${OVER:-?}  ·  LINUX ${KVER:-?}  ·  ${HOST:-PC}" \
+  -fill "#$LEGIBLE" -gravity southeast -annotate +$((M+BR*40/100))+$((M+BR*38/100)) "OMARCHY ${OVER:-?}  ·  ${HOST:-PC}"$'\n'"LINUX ${KVER:-?}" \
   "$STAGE/wallpaper.png"
 
 # Plymouth y SDDM a partir de los activos originales de Omarchy.
