@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "zerolayer.lock",
+  "name": "ZerØLayer Lock Screen",
+  "version": "1.0.0",
+  "author": "ZerØLayer",
+  "description": "Pantalla de bloqueo Frost: hora grande, «dispositivo / distro» y color del tema ZERØ activo.",
+  "omarchy": {
+    "capabilities": [
+      "authentication"
+    ],
+    "clonedFrom": "omarchy.lock"
+  },
+  "kinds": [
+    "service"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Service.qml"
+  }
+}

@@ -38,6 +38,7 @@ git clone https://github.com/raulplz/ZeroLayer.git ~/.local/share/zerolayer
 | `gtk` | sí | Colores Frost en aplicaciones GTK3/GTK4 (Nautilus, ajustes…). |
 | `boot` | no | Arranque que sigue al tema activo: menú de Limine (colores, tu fondo de escritorio y datos del sistema) y pantallas de contraseña de disco y de sesión con el logo ZERØ. Pide sudo una vez para instalar un servicio de systemd. |
 | `brave` | no | Brave más limpio: pestañas verticales plegadas, nueva pestaña Frost con solo el reloj, sin botones de Leo/Wallet/Rewards/News y ahorro de memoria. Brave debe estar cerrado. |
+| `lock` | no | Pantalla de bloqueo Frost: plugin `zerolayer.lock` del shell de Omarchy (derivado de `omarchy.lock`, MIT) con hora grande y «DISPOSITIVO / DISTRO» bajo ella, en el segundo acento del tema ZERØ activo. Desactiva `omarchy.lock` y otros bloqueos activos y los reactiva al desinstalar. |
 | `serpantinum` | no | Escritorio para [Serpantinum](https://github.com/ilyamiro/serpantinum): notas `.md`, chats destacados de Claude Code o Codex, tu GitHub, espectro de audio «hacker» y widgets solo en escritorios vacíos. Requiere Serpantinum instalado. |
 
 ![Arranque Frost](docs/arranque.png)
