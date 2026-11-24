@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Familia de temas ZERØ para Omarchy: zero-frost, zero-corp, zero-neon, zero-phosphor,
-# zero-amber y zero-void. Cada uno es un tema completo de Omarchy (colores, fondo a la
+# zero-amber, zero-void y zero-mono. Cada uno es un tema completo de Omarchy (colores, fondo a la
 # resolución de tu monitor, iconos de carpeta y vista previa), así que salen también en
 # el selector nativo. Un hook theme-set mantiene ~/.config/zerolayer/theme.json y GTK
 # al día con el tema que elijas, sea o no ZERØ (también la paleta de Serpantinum si lo
 # tienes: theme.colors de su settings.json, que se devuelve al desinstalar).
 # Los fondos y la paleta se generan con generar.py (uv run --with pillow).
 
-MODULE_DESC="Temas ZERØ para Omarchy (Frost, Corp, Neon, Phosphor, Amber, Void) con fondos e iconos"
+MODULE_DESC="Temas ZERØ para Omarchy (Frost, Corp, Neon, Phosphor, Amber, Void, Mono) con fondos e iconos"
 MODULE_DEFAULT=1
 
 THEMES_SRC="$MODULE_DIR/themes"

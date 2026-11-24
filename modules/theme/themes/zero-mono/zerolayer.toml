@@ -1,0 +1,19 @@
+# Metadatos ZERØ: los lee el hook de ZerØLayer para escribir ~/.config/zerolayer/theme.json
+id = "zero-mono"
+nombre = "ZERØ Mono"
+glifo = "Ø"
+kanji = "無"
+idea = "Negro puro con luz blanca: retícula, anillos finos y un Ø de tiza."
+
+[colores]
+superficie = "#101010"
+borde = "#262626"
+tenue = "#8a8a8a"
+acento2 = "#bdbdbd"
+ok = "#a3c9ab"
+aviso = "#d9cfa0"
+peligro = "#e08a8a"
+
+[fuentes]
+sans = "Inter Tight"
+mono = "JetBrainsMono Nerd Font"

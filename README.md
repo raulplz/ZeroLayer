@@ -33,7 +33,7 @@ git clone https://github.com/raulplz/ZeroLayer.git ~/.local/share/zerolayer
 
 | Módulo | Por defecto | Qué hace |
 |---|---|---|
-| `theme` | sí | Seis temas ZERØ para Omarchy (`zero-frost`, `zero-corp`, `zero-neon`, `zero-phosphor`, `zero-amber`, `zero-void`) con paleta, fondo a la resolución de tu monitor e iconos de carpeta propios. Escribe `~/.config/zerolayer/theme.json` al cambiar de tema (ver «Temas ZERØ»). |
+| `theme` | sí | Siete temas ZERØ para Omarchy (`zero-frost`, `zero-corp`, `zero-neon`, `zero-phosphor`, `zero-amber`, `zero-void`, `zero-mono`) con paleta, fondo a la resolución de tu monitor e iconos de carpeta propios. Escribe `~/.config/zerolayer/theme.json` al cambiar de tema (ver «Temas ZERØ»). |
 | `hyprland` | sí | Esquinas de 14 px, márgenes, desenfoque, atenuado leve de ventanas inactivas y animación de escritorios en deslizamiento. |
 | `gtk` | sí | Colores Frost en aplicaciones GTK3/GTK4 (Nautilus, ajustes…). |
 | `boot` | no | Arranque que sigue al tema activo: menú de Limine (colores, tu fondo de escritorio y datos del sistema) y pantallas de contraseña de disco y de sesión con el logo ZERØ. Pide sudo una vez para instalar un servicio de systemd. |
@@ -44,16 +44,17 @@ git clone https://github.com/raulplz/ZeroLayer.git ~/.local/share/zerolayer
 
 ## Temas ZERØ
 
-El módulo `theme` instala seis temas completos de Omarchy. Cada uno trae su paleta, un fondo a la resolución de tu monitor (1920×1200, 1920×1080 o 2560×1440), sus iconos de carpeta y su vista previa. Por eso también aparecen en el menú nativo de temas de Omarchy (Super + Alt + Espacio → Estilo → Tema).
+El módulo `theme` instala siete temas completos de Omarchy. Cada uno trae su paleta, un fondo a la resolución de tu monitor (1920×1200, 1920×1080 o 2560×1440), sus iconos de carpeta y su vista previa. Por eso también aparecen en el menú nativo de temas de Omarchy (Super + Alt + Espacio → Estilo → Tema).
 
 | Tema | Nombre | Acento | Idea |
 |---|---|---|---|
-| `zero-frost` | ZERØ Frost | `#4da3ff` | Azul hielo sobre negro, anillo HUD y circuitos. Es el de siempre. |
+| `zero-frost` | ZERØ Frost | `#4da3ff` | Azul hielo sobre negro: anillo HUD, circuitos, nieve y paneles de lectura. Es el de siempre. |
 | `zero-corp` | ZERØ Corp | `#e8182c` | Rojo y negro corporativo, kanji 零, katakana y franjas de seguridad. |
 | `zero-neon` | ZERØ Neon | `#ff2bd6` | Barrio de neón con lluvia y rejilla al horizonte; cian `#22e5ff` como segundo acento. |
 | `zero-phosphor` | ZERØ Phosphor | `#39ff6a` | Terminal de fósforo verde, líneas de barrido y brillo de tubo. |
 | `zero-amber` | ZERØ Amber | `#ffb000` | Laboratorio de señal en ámbar, retícula de osciloscopio. |
 | `zero-void` | ZERØ Void | `#a879ff` | Vacío ultravioleta, nebulosa y un Ø enorme. |
+| `zero-mono` | ZERØ Mono | `#f2f2f2` | Negro puro con detalles en blanco: retícula, anillos finos y un Ø de tiza. |
 
 ![Escritorio con ZERØ Frost, Corp y Neon](docs/img/escritorio-frost.png)
 

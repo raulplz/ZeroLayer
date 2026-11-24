@@ -92,6 +92,17 @@ TEMAS = {
         hyprland_active_border="rgba(a879ffee) rgba(5de4c7ee) 45deg", hyprland_inactive_border="#221a38",
         superficie="#13101e", borde="#221a38", tenue="#8a82a3", acento2="#5de4c7", ok="#7fe0a8", aviso="#f2d07a", peligro="#ff6e8a",
     ),
+    "zero-mono": dict(
+        nombre="ZERØ Mono", kanji="無", yaru="Yaru", icono="Zero-Mono",
+        idea="Negro puro con luz blanca: retícula, anillos finos y un Ø de tiza.",
+        background="#050505", dark_background="#030303", darker_background="#010101", lighter_background="#101010",
+        foreground="#d8d8d8", dark_foreground="#8a8a8a", light_foreground="#ececec", bright_foreground="#ffffff",
+        accent="#f2f2f2", selection="#2a2a2a", muted="#5c5c5c",
+        red="#e08a8a", yellow="#d9cfa0", orange="#d9b08a", green="#a3c9ab", cyan="#a6cfd6", blue="#a9b8d6", magenta="#c6b0d6", brown="#9a8a7a",
+        bright_red="#f2a8a8", bright_yellow="#ece3b8", bright_green="#bfe0c6", bright_cyan="#c4e4ea", bright_blue="#c6d2ea", bright_magenta="#dccbea",
+        hyprland_active_border="#f2f2f2", hyprland_inactive_border="#262626",
+        superficie="#101010", borde="#262626", tenue="#8a8a8a", acento2="#bdbdbd", ok="#a3c9ab", aviso="#d9cfa0", peligro="#e08a8a",
+    ),
 }
 CLAVES_OMARCHY = ["accent", "selection", "muted", "background", "dark_background", "darker_background", "lighter_background",
                   "foreground", "dark_foreground", "light_foreground", "bright_foreground",
@@ -280,6 +291,23 @@ def codigo_barras(d, x, y, w, h, semilla, col, a):
         cx += bw + rnd.choice([2, 3, 4])
 
 
+# Zonas que tapan los widgets del escritorio (layout de ZerØLayer, coordenadas lógicas de 1536×960):
+# columna izquierda, columna derecha y banda del espectro. Los fondos no dibujan detalles ahí.
+def zonas(W, H, m=0):
+    f = lambda x0, y0, x1, y1: (x0 / 1536 * W - m, y0 / 960 * H - m, x1 / 1536 * W + m, y1 / 960 * H + m)
+    return [f(80, 100, 380, 710), f(1110, 100, 1425, 785), f(80, 800, 1456, 910)]
+
+
+def toca_zona(pts, W, H, m=0):
+    zs = zonas(W, H, m)
+    for (ax, ay), (bx, by) in zip(pts, pts[1:] or pts):
+        for k in range(25):
+            x, y = ax + (bx - ax) * k / 24, ay + (by - ay) * k / 24
+            if any(z[0] <= x <= z[2] and z[1] <= y <= z[3] for z in zs):
+                return True
+    return False
+
+
 SK = math.tan(math.radians(14))
 OCTO = [(424, 60), (470, 60), (492, 82), (492, 168), (470, 190), (424, 190), (402, 168), (402, 82)]
 
@@ -336,6 +364,30 @@ def fondo_frost(W, H, t):
     img = brillo(img, ov, S(3))
     halo, hd = capa(W, H); hd.ellipse([CX - S(340), CY - S(340), CX + S(340), CY + S(340)], fill=(40, 110, 200, 90))
     img = Image.alpha_composite(img, halo.filter(ImageFilter.GaussianBlur(S(120))))
+    # circuitos: pistas PCB con nodos, fuera del anillo central
+    ov, d = capa(W, H)
+    for k, pts in enumerate([p for p in pistas(W, H, 120, S(40), 7, (CX - S(500), CY - S(470), CX + S(500), CY + S(470)))
+                             if not toca_zona(p, W, H, S(16))]):
+        d.line(pts, fill=ICE + (46 if k % 3 else 80,), width=S(2) if k % 5 == 0 else 1, joint="curve")
+        for (px_, py_) in (pts[0], pts[-1]):
+            r = S(4)
+            d.ellipse([px_ - r, py_ - r, px_ + r, py_ + r], outline=ICE2 + (120,), width=1)
+            d.ellipse([px_ - 1, py_ - 1, px_ + 1, py_ + 1], fill=ICE2 + (190,))
+    img = brillo(img, ov, S(2))
+    # nieve y chispas de hielo
+    ov, d = capa(W, H); rnd = random.Random(11)
+    for _ in range(int(900 * W * H / (1920 * 1080))):
+        x, y = rnd.randrange(W), rnd.randrange(H); a = int(rnd.random() ** 3 * 190) + 20
+        c = rnd.choice([(255, 255, 255), ICE2, ICE])
+        if rnd.random() < .05: d.ellipse([x - 1, y - 1, x + 1, y + 1], fill=c + (min(255, a + 60),))
+        else: d.point((x, y), fill=c + (a,))
+    for _ in range(40):
+        x, y = rnd.randrange(W), rnd.randrange(H); L = S(rnd.randint(7, 15))
+        if toca_zona([(x - L, y - L), (x + L, y + L)], W, H, S(8)): continue
+        d.line([(x - L, y), (x + L, y)], fill=ICE2 + (150,), width=1); d.line([(x, y - L), (x, y + L)], fill=ICE2 + (150,), width=1)
+        d.line([(x - L // 2, y - L // 2), (x + L // 2, y + L // 2)], fill=ICE + (70,), width=1)
+        d.line([(x - L // 2, y + L // 2), (x + L // 2, y - L // 2)], fill=ICE + (70,), width=1)
+    img = brillo(img, ov, 1)
     ov, d = capa(W, H)
     for r, a, wd in [(S(400), 55, S(1)), (S(372), 150, S(2)), (S(300), 45, S(1))]:
         d.ellipse([CX - r, CY - r, CX + r, CY + r], outline=ICE + (a,), width=wd)
@@ -348,7 +400,7 @@ def fondo_frost(W, H, t):
     for a0, a1 in ((200, 245), (20, 65)):
         d.arc([CX - R, CY - R, CX + R, CY + R], a0, a1, fill=ICE2 + (210,), width=S(5))
     for sg in (-1, 1):
-        d.line([(CX + sg * S(410), CY), (CX + sg * S(470), CY)], fill=ICE + (170,), width=S(2))
+        d.line([(CX + sg * S(404), CY), (CX + sg * S(424), CY)], fill=ICE + (170,), width=S(2))
         d.line([(CX, CY + sg * S(383)), (CX, CY + sg * S(400))], fill=ICE + (170,), width=S(2))
     img = brillo(img, ov, S(4))
     E, d = capa(W, H)
@@ -361,6 +413,28 @@ def fondo_frost(W, H, t):
     d.text((S(70), H - S(82)), "氷点下 · SUBZERO NODE", font=fk, fill=ICE + (90,))
     d.text((W - S(70), H - S(112)), "-273.15 °C  //  0x00-FR", font=fm, fill=ICE + (120,), anchor="ra")
     esquinas(d, (S(40), S(70), W - S(40), H - S(56)), S(60), ICE, 110, S(2))
+    # regla superior con marcas
+    fr = fuente(F_MONO_R, S(11))
+    for i, x in enumerate(range(S(120), W - S(120), S(16))):
+        L = S(12) if i % 5 == 0 else S(5)
+        d.line([(x, S(70)), (x, S(70) + L)], fill=ICE + (90 if i % 5 == 0 else 50,), width=1)
+        if i % 10 == 0: d.text((x, S(70) + S(18)), "%03d" % (i * 2), font=fr, fill=ICE + (90,), anchor="ma")
+    # lecturas compactas en las esquinas del hueco central (entre las columnas de widgets)
+    rr = random.Random(5); px0, py0 = CX - S(440), S(150)
+    d.text((px0, py0), "CRYO://CORE", font=fr, fill=ICE2 + (150,))
+    for i in range(9):
+        hh = int(S(46) * (.25 + .75 * rr.random()))
+        d.rectangle([px0 + i * S(11), py0 + S(66) - hh, px0 + i * S(11) + S(6), py0 + S(66)], fill=ICE + (70 + int(120 * hh / S(46)),))
+    d.line([(px0, py0 + S(72)), (px0 + 9 * S(11), py0 + S(72))], fill=ICE + (110,), width=1)
+    qx, qy = CX + S(250), S(150)
+    d.text((qx, qy), "SYS://LATTICE", font=fr, fill=ICE2 + (150,))
+    for i, (n, v) in enumerate([("FLUX", .82), ("COOL", .64), ("SYNC", .97)]):
+        y = qy + S(22) + i * S(22)
+        d.text((qx, y), n, font=fr, fill=ICE + (130,))
+        d.rectangle([qx + S(44), y + S(3), qx + S(120), y + S(9)], outline=ICE + (90,), width=1)
+        d.rectangle([qx + S(46), y + S(5), qx + S(46) + int(S(72) * v), y + S(7)], fill=ICE2 + (190,))
+    d.text((S(70), S(104)), "SECTOR 00 · SUBZERO", font=fr, fill=ICE + (110,))
+    d.text((W - S(70), S(104)), "LAT 90.0°S · LON 000.0°", font=fr, fill=ICE + (110,), anchor="ra")
     img = brillo(img, ov, S(3))
     return lineas_barrido(vineta(img, .55), 8)
 
@@ -642,8 +716,63 @@ def fondo_void(W, H, t):
     return vineta(img, .6)
 
 
+def fondo_mono(W, H, t):
+    s = min(W / 1920, H / 1080); S = lambda v: max(1, int(v * s)); CX, CY = W // 2, H // 2
+    B, G = (245, 245, 245), (150, 150, 150)
+    img = radial(W, H, (0, 0, 0), (20, 20, 20), 2.2)
+    ov, d = capa(W, H)
+    for x in range(0, W, S(48)):
+        for y in range(0, H, S(48)):
+            d.point((x, y), fill=B + (60,))
+            if (x // S(48) + y // S(48)) % 8 == 0:
+                d.line([(x - 3, y), (x + 3, y)], fill=B + (90,)); d.line([(x, y - 3), (x, y + 3)], fill=B + (90,))
+    img = brillo(img, ov, 0)
+    halo, hd = capa(W, H); hd.ellipse([CX - S(300), CY - S(300), CX + S(300), CY + S(300)], fill=(255, 255, 255, 34))
+    img = Image.alpha_composite(img, halo.filter(ImageFilter.GaussianBlur(S(140))))
+    ov, d = capa(W, H)
+    for r, a, wd in [(S(385), 40, 1), (S(355), 70, S(1)), (S(290), 40, 1), (S(225), 55, 1)]:
+        d.ellipse([CX - r, CY - r, CX + r, CY + r], outline=B + (a,), width=wd)
+    for deg in range(0, 360, 2):
+        a = math.radians(deg); r0 = S(355); L = S(18) if deg % 30 == 0 else (S(9) if deg % 10 == 0 else S(4))
+        d.line([(CX + math.cos(a) * r0, CY + math.sin(a) * r0), (CX + math.cos(a) * (r0 + L), CY + math.sin(a) * (r0 + L))],
+               fill=B + (150 if deg % 30 == 0 else 70,), width=1)
+    R = S(385)
+    for a0, a1 in ((-100, -40), (80, 140), (170, 182)):
+        d.arc([CX - R, CY - R, CX + R, CY + R], a0, a1, fill=B + (230,), width=S(5))
+    d.line([(CX, CY - S(420)), (CX, CY - S(480))], fill=B + (140,), width=1)
+    img = brillo(img, ov, S(2))
+    E, d = capa(W, H)
+    o_barra(d, CX, CY, 1.9 * s, B, 255, S(5))
+    img = brillo(img, E, S(26), 2)
+    E, d = capa(W, H)
+    o_barra(d, CX, CY, 1.9 * s, B, 255, S(4))
+    img = Image.alpha_composite(img, E)
+    ov, d = capa(W, H); fm = fuente(F_MONO, S(15)); fr = fuente(F_MONO_R, S(12)); fk = fuente(F_CJK, S(17))
+    logotipo(d, S(70), H - S(148), S(26), B, 230, S(4))
+    d.text((S(70), H - S(106)), "ZERØLAYER // MONO", font=fm, fill=B + (170,))
+    d.text((S(70), H - S(82)), "無 · BLACK / WHITE", font=fk, fill=B + (110,))
+    d.text((W - S(70), H - S(112)), "#000000  //  #F2F2F2", font=fm, fill=B + (140,), anchor="ra")
+    esquinas(d, (S(40), S(70), W - S(40), H - S(56)), S(60), B, 140, S(2))
+    d.text((S(70), S(98)), "REF 0000-ZERO", font=fr, fill=B + (130,))
+    d.text((W - S(70), S(98)), "N 00°00′00″  E 000°00′00″", font=fr, fill=B + (130,), anchor="ra")
+    rr = random.Random(21); px0, py0 = CX - S(440), S(150)
+    d.text((px0, py0), "MONO://LEVEL", font=fr, fill=B + (150,))
+    for i in range(12):
+        x = px0 + i * S(9); hh = int(S(46) * (.15 + .85 * rr.random()))
+        d.rectangle([x, py0 + S(66) - hh, x + S(4), py0 + S(66)], fill=B + (60 + int(110 * hh / S(46)),))
+    codigo_barras(d, CX + S(250), S(150), S(110), S(26), 9, B, 120)
+    d.text((CX + S(250), S(184)), "00 / 00 / 00", font=fr, fill=B + (130,))
+    img = brillo(img, ov, S(2))
+    # grano
+    rnd = random.Random(8); gr, d = capa(W, H)
+    for _ in range(int(2400 * W * H / (1920 * 1080))):
+        d.point((rnd.randrange(W), rnd.randrange(H)), fill=(255, 255, 255, rnd.randint(8, 40)))
+    img = Image.alpha_composite(img, gr)
+    return vineta(img, .7)
+
+
 FONDOS = {"zero-frost": fondo_frost, "zero-corp": fondo_corp, "zero-neon": fondo_neon,
-          "zero-phosphor": fondo_phosphor, "zero-amber": fondo_amber, "zero-void": fondo_void}
+          "zero-phosphor": fondo_phosphor, "zero-amber": fondo_amber, "zero-void": fondo_void, "zero-mono": fondo_mono}
 
 
 def vista_previa(tid, t, fondo):
